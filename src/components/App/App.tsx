@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -32,7 +32,6 @@ const ReactPaginate = (
 export default function App() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-
   const [selectedMovie, setSelectedMovie] =
     useState<Movie | null>(null);
 
@@ -43,29 +42,19 @@ export default function App() {
     isSuccess,
   } = useQuery({
     queryKey: ["movies", query, page],
-
-    queryFn: () =>
-      fetchMovies(query, page),
-
+    queryFn: () => fetchMovies(query, page),
     enabled: query !== "",
-
-    placeholderData: previousData =>
-      previousData,
+    placeholderData: previousData => previousData,
   });
 
-  const handleSearch = (
-    newQuery: string
-  ) => {
+  const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
     setPage(1);
     setSelectedMovie(null);
   };
 
-  const movies =
-    data?.results ?? [];
-
-  const totalPages =
-    data?.total_pages ?? 0;
+  const movies = data?.results ?? [];
+  const totalPages = data?.total_pages ?? 0;
 
   useEffect(() => {
     if (
@@ -77,17 +66,13 @@ export default function App() {
         "No movies found for your request."
       );
     }
-  }, [
-    isSuccess,
-    query,
-    movies.length,
-  ]);
+  }, [isSuccess, query, movies.length]);
 
   return (
     <div className={css.app}>
-      <SearchBar
-        onSubmit={handleSearch}
-      />
+      <Toaster position="top-right" />
+
+      <SearchBar onSubmit={handleSearch} />
 
       {isLoading && <Loader />}
 
@@ -99,38 +84,20 @@ export default function App() {
           <>
             <MovieGrid
               movies={movies}
-              onSelect={
-                setSelectedMovie
-              }
+              onSelect={setSelectedMovie}
             />
 
             {totalPages > 1 && (
               <ReactPaginate
-                pageCount={
-                  totalPages
+                pageCount={totalPages}
+                pageRangeDisplayed={5}
+                marginPagesDisplayed={1}
+                onPageChange={({ selected }) =>
+                  setPage(selected + 1)
                 }
-                pageRangeDisplayed={
-                  5
-                }
-                marginPagesDisplayed={
-                  1
-                }
-                onPageChange={({
-                  selected,
-                }) =>
-                  setPage(
-                    selected + 1
-                  )
-                }
-                forcePage={
-                  page - 1
-                }
-                containerClassName={
-                  css.pagination
-                }
-                activeClassName={
-                  css.active
-                }
+                forcePage={page - 1}
+                containerClassName={css.pagination}
+                activeClassName={css.active}
                 nextLabel="→"
                 previousLabel="←"
               />
@@ -140,13 +107,9 @@ export default function App() {
 
       {selectedMovie && (
         <MovieModal
-          movie={
-            selectedMovie
-          }
+          movie={selectedMovie}
           onClose={() =>
-            setSelectedMovie(
-              null
-            )
+            setSelectedMovie(null)
           }
         />
       )}
